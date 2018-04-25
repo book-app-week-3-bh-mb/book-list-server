@@ -7,6 +7,7 @@ const cors = require('cors');
 const app = express();
 const client = new pg.Client(process.env.DATABASE_URL || 'postgres://localhost:5432/books_app');
 const PORT = process.env.PORT || 3000;
+const CLIENT_URL = process.env.CLIENT_URL;
 
 client.connect();
 client.on('error', err => console.error(err));
@@ -18,6 +19,7 @@ app.use(express.urlencoded({
 app.use(cors());
 
 app.get('/api/v1/books', (req, res) => {
+  console.log('in get')
   client.query("SELECT * FROM books")
     .then(results => res.send(results.rows))
     .catch(err => {
@@ -52,7 +54,7 @@ app.post('/api/v1/books', (req, res) => {
     });
 });
 
-app.get('*', (req, res) => res.send("Access Denied"));
+app.get('*', (req, res) => res.redirect(CLIENT_URL));
 
 loadDB();
 
