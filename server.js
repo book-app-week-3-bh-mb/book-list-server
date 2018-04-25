@@ -5,7 +5,8 @@ const express = require('express');
 const pg = require('pg');
 const cors = require('cors');
 const app = express();
-const client = new pg.Client(process.env.DATABASE_URL);
+const client = new pg.Client(process.env.DATABASE_URL || 'postgres://localhost:5432/books_app');
+const PORT = process.env.PORT || 3000;
 
 client.connect();
 client.on('error', err => console.error(err));
@@ -55,7 +56,7 @@ app.get('*', (req, res) => res.send("Access Denied"));
 
 loadDB();
 
-app.listen(process.env.PORT, () => console.log(`Server up on port ${process.env.PORT}`));
+app.listen(PORT, () => console.log(`Server up on port ${PORT}`));
 
 //////////////////
 
