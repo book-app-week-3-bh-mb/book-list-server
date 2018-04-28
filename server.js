@@ -18,9 +18,14 @@ app.use(express.urlencoded({
 }));
 app.use(cors());
 
+app.get('/authenticate', (req,res) => {
+  console.log("TOKEN", req.query.token, req.query.token === process.env.TOKEN );
+  res.send( req.query.token === process.env.TOKEN );
+});
+
 app.get('/api/v1/books', (req, res) => {
   console.log('in get')
-  client.query("SELECT * FROM books")
+  client.query('SELECT * FROM books')
     .then(results => res.send(results.rows))
     .catch(err => {
       console.error(err);
@@ -51,6 +56,49 @@ app.post('/api/v1/books', (req, res) => {
     .catch(err => {
       console.error(err);
       res.sendStatus(500).send("Error");
+    });
+});
+
+app.put(`/api/v1/edit/:id`, (request, response) => {
+  console.log('put has been called');
+  console.log(request.body);
+  console.log(request.params.id+1);
+  var index = parseInt(request.params.id);
+  console.log(index);
+  client.query(
+    `UPDATE books
+    SET title=$1, author=$2, isbn=$3, image_url=$4, description=$5
+    WHERE book_id=$6;`,
+    [
+      request.body.title,
+      request.body.author,
+      request.body.isbn,
+      request.body.image_url,
+      request.body.description,
+      index
+    ]
+  )
+    .then(() => {
+      response.send('update complete')
+    })
+    .catch(err => {
+      console.error(err);
+    });
+});
+
+app.delete(`/api/v1/books/:id`, (request, response) => {
+  // COMMENT: What number(s) of the full-stack-diagram.png image correspond to the following line of code? Which method of article.js is interacting with this particular piece of `server.js`? What part of CRUD is being enacted/managed by this particular piece of code?
+  // For query, the number is 3. But for response, it is 5. The method in article.js being interacted with is Article.prototype.deleteRecord. The part of CRUD being enacted is delete. However, no delete button is present.
+  console.log('trying to delete');
+  client.query(
+    `DELETE FROM books WHERE book_id=$1;`,
+    [request.params.id]
+  )
+    .then(() => {
+      response.send('Delete complete')
+    })
+    .catch(err => {
+      console.error(err);
     });
 });
 
